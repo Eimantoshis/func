@@ -1,0 +1,17 @@
+<Farm> ::= <Fields> <Livestock> <Inventory>
+
+<Operation> ::= "Add" <Entity> | "Remove" <Entity> | "Schedule" <Action> | "Restock" <Item>
+
+<Entity> ::= <Crops> | <Livestock> | <Inventory>
+
+<Crops> ::= "Wheat" | "Corn" | "Soy" | "Barley"
+<Livestock> ::= "Cows" | "Chickens" | "Sheep" | "Pigs"
+<Inventory> ::= "Seeds" | "Fertilizers" | "Feed"
+
+<Action> ::= "Plant" | "Harvest" | "Feed"
+
+<Item> ::= <Seeds> | <Fertilizer> | <Feed>
+
+<Seeds> ::= "Corn" | "Wheat"
+<Fertilizer> ::= "Organic" | "Synthetic"
+<Feed> ::= "Hay" | "Grains"
