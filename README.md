@@ -21,12 +21,12 @@
 
 * Crops: Various types of plants managed on the farm.
 * Livestock: Animals raised on the farm.
-* Inventory: Seeds, fertilizers, feed, etc.
+* Inventory: Seeds, feed, etc.
 
 **Main Operations:**
 
 * Add/Remove Crops or Livestock: Add new crops or livestock to the system or remove them.
-* Manage Inventory: Track inventory of seeds, fertilizers, and feed.
+* Manage Inventory: Track inventory of seeds and feed.
 
 **Code example**
 
