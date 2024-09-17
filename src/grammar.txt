@@ -1,17 +1,35 @@
-<Farm> ::= <Fields> <Livestock> <Inventory>
+<Farm> ::= <Fields> <Barn> <Inventory>
 
-<Operation> ::= "Add" <Entity> | "Remove" <Entity> | "Schedule" <Action> | "Restock" <Item>
+<Operation> ::= "ADD " <Entity> " to " <Location> | "REMOVE " <Entity> " from " <Location> | "RESTOCK " <Inventory> <Quantity>
 
-<Entity> ::= <Crops> | <Livestock> | <Inventory>
+<Entity> ::= <Crops> | <Livestock> 
 
-<Crops> ::= "Wheat" | "Corn" | "Soy" | "Barley"
-<Livestock> ::= "Cows" | "Chickens" | "Sheep" | "Pigs"
-<Inventory> ::= "Seeds" | "Fertilizers" | "Feed"
+<Crops> ::= "CROP: " <Crop> | "CROPS: " <Crop> ", " <CropList>
 
-<Action> ::= "Plant" | "Harvest" | "Feed"
+<CropList> ::= <Crop> | <Crop> ", " <CropList>
+<Crop> ::= "Wheat" | "Corn" | "Soy" | "Barley"
 
-<Item> ::= <Seeds> | <Fertilizer> | <Feed>
+<Livestock> ::= "LIVESTOCK: " <LivestockItem> | "LIVESTOCK: " <LivestockItem> ", " <LivestockList>
+
+<LivestockList> ::= <LivestockItem> | <LivestockItem> ", " <LivestockList>
+<LivestockItem> ::= "Cows" | "Chickens" | "Sheep" | "Pigs"
+
+<Inventory> ::= "INVENTORY: " <ItemList>
+
+<ItemList> ::= <Item> | <Item> ", " <ItemList>
+<Item> ::= <Seeds> | <Feed>
+
+<Location> ::= <Field> | <Barn>
+
+<Field> ::= "FIELD: " <FieldName> | <Field> " FIELD SECTION " <Field> | <Field> <Crops>
+
+<Barn> ::= "BARN: " <BarnName> | <Barn> " BARN SECTION " <Barn> | <Barn> <Livestock>
 
 <Seeds> ::= "Corn" | "Wheat"
-<Fertilizer> ::= "Organic" | "Synthetic"
 <Feed> ::= "Hay" | "Grains"
+
+<Quantity> ::= "QUANTITY: " <Number>
+<Number> ::= [0-9]+
+
+<FieldName> ::= "Field1" | "Field2" | "Field3"
+<BarnName> ::= "Barn1" | "Barn2" | "Barn3"

@@ -12,45 +12,29 @@ completions = [
     "field",
     "barn",
     "livestock",
-    "animal",
-    "tractor",
-    "equipment",
-    "planting-schedule",
-    "harvest-schedule",
     "inventory",
     "seed",
     "fertilizer",
     "feed",
-    "weather",
-    "market-price",
 
     -- Crops
     "Wheat",
     "Corn",
-    "Soybean",
-    "Rice",
-    "Potatoes",
-    "Vegetables",
-    "Fruits",
+    "Soy",
+    "Barley",
 
     -- Livestock
     "Cows",
     "Sheep",
     "Chickens",
     "Pigs",
-    "Goats",
 
     -- Commands
-    "addCrop",
-    "removeCrop",
-    "plantCrop",
-    "harvestCrop",
-    "addLivestock",
-    "feedLivestock",
-    "checkWeather",
-    "trackMarketPrices",
-    "updateInventory",
-    "schedulePlanting",
-    "scheduleHarvest"
+    "Add",
+    "Remove",
+    "Restock",
+    "Plant",
+    "Harvest",
+    "Feed"
     ]
 
