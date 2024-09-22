@@ -26,7 +26,6 @@
 **Main Operations:**
 
 * Add/Remove Crops or Livestock: Add new crops or livestock to the system or remove them.
-* Manage Inventory: Track inventory of seeds and feed.
 
 **Code example**
 
