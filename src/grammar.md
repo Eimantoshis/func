@@ -1,35 +1,34 @@
-<Farm> ::= <Fields> <Barn> <Inventory>
+<Farm> ::= <Field> <Barn> <Inventory>
 
-<Operation> ::= "ADD " <Entity> " to " <Location> | "REMOVE " <Entity> " from " <Location> | "RESTOCK " <Inventory> <Quantity>
+<Operation> ::= "ADD " <Entity> " to " <Location> | "REMOVE " <Entity> " FROM " <Location> | "RESTOCK " <Inventory> 
 
 <Entity> ::= <Crops> | <Livestock> 
 
-<Crops> ::= "CROP: " <Crop> | "CROPS: " <Crop> ", " <CropList>
+<Crops> ::= "CROP: " <Crop> <Quantity> | "CROPS: " <Crop> <Quantity> ", " <CropList>
 
-<CropList> ::= <Crop> | <Crop> ", " <CropList>
-<Crop> ::= "Wheat" | "Corn" | "Soy" | "Barley"
+<CropList> ::= <Crop> <Quantity> | <Crop> <Quantity> ", " <CropList>
+<Crop> ::= "Wheat " | "Corn " | "Soy " | "Barley "
 
-<Livestock> ::= "LIVESTOCK: " <LivestockItem> | "LIVESTOCK: " <LivestockItem> ", " <LivestockList>
+<Livestock> ::= "LIVESTOCK: " <LivestockItem> <Quantity> | "LIVESTOCK: " <LivestockItem> <Quantity> ", " <LivestockList>
 
-<LivestockList> ::= <LivestockItem> | <LivestockItem> ", " <LivestockList>
-<LivestockItem> ::= "Cows" | "Chickens" | "Sheep" | "Pigs"
+<LivestockList> ::= <LivestockItem>  <Quantity> | <LivestockItem> <Quantity> ", " <LivestockList>
+<LivestockItem> ::= "Cows " | "Chickens " | "Sheep " | "Pigs "
 
-<Inventory> ::= "INVENTORY: " <ItemList>
+<Inventory> ::= "INVENTORY: " <ItemList> <Quantity>
 
-<ItemList> ::= <Item> | <Item> ", " <ItemList>
+<ItemList> ::= <Item> <Quantity> | <Item> <Quantity> ", " <ItemList>
 <Item> ::= <Seeds> | <Feed>
 
 <Location> ::= <Field> | <Barn>
 
-<Field> ::= "FIELD: " <FieldName> | <Field> " FIELD SECTION " <Field> | <Field> <Crops>
+<Field> ::= "FIELD: " <FieldName> 
 
-<Barn> ::= "BARN: " <BarnName> | <Barn> " BARN SECTION " <Barn> | <Barn> <Livestock>
+<Barn> ::= "BARN: " <BarnName>
 
-<Seeds> ::= "Corn" | "Wheat"
-<Feed> ::= "Hay" | "Grains"
+<Seeds> ::= "Corn " | "Wheat "
+<Feed> ::= "Hay " | "Grains "
 
-<Quantity> ::= "QUANTITY: " <Number>
-<Number> ::= [0-9]+
+<Quantity> ::= [0-9]+
 
-<FieldName> ::= "Field1" | "Field2" | "Field3"
-<BarnName> ::= "Barn1" | "Barn2" | "Barn3"
+<FieldName> ::= "Field1 " | "Field2 " | "Field3 "
+<BarnName> ::= "Barn1 " | "Barn2 " | "Barn3 "

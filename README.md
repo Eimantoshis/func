@@ -30,7 +30,8 @@
 
 **Code example**
 
-* ADD CROPS: Wheat, Soy to FIELD: Field1
-* REMOVE LIVESTOCK: Cow FROM BARN: Barn2
-* RESTOCK INVENTORY: Barley QUANTITY: 100
+* ADD CROPS: Soy 7, Corn 3, Barley 7 to BARN: Barn1 
+* REMOVE LIVESTOCK: Cows 855, Chickens 1 FROM BARN: Barn1 
+* RESTOCK INVENTORY: Grains 2943
+* ADD LIVESTOCK: Chickens 7, Sheep 17, Cows 708 to FIELD: Field1 
 
