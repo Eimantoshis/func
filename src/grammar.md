@@ -4,19 +4,28 @@
 
 <Entity> ::= <Crops> | <Livestock> 
 
-<Crops> ::= "CROP: " <Crop> <Quantity> | "CROPS: " <Crop> <Quantity> ", " <CropList>
+<Crops> ::= "CROP: " <Crop> <Quantity> | "CROPS: "  <CropNode>
 
-<CropList> ::= <Crop> <Quantity> | <Crop> <Quantity> ", " <CropList>
+<CropNode> ::= <CropBranch> | <CropLeaf>
+<CropBranch> ::= <CropNode> ", " <CropNode>
+<CropLeaf> ::= <Crop> <Quantity>
+
 <Crop> ::= "Wheat " | "Corn " | "Soy " | "Barley "
 
-<Livestock> ::= "LIVESTOCK: " <LivestockItem> <Quantity> | "LIVESTOCK: " <LivestockItem> <Quantity> ", " <LivestockList>
+<Livestock> ::= "LIVESTOCK: " <LivestockNode>
 
-<LivestockList> ::= <LivestockItem>  <Quantity> | <LivestockItem> <Quantity> ", " <LivestockList>
+<LivestockNode> ::= <LivestockBranch> | <LivestockLeaf>
+<LivestockBranch> ::= <LivestockNode> ", " <LivestockNode>
+<LivestockLeaf> ::= <LivestockItem> <Quantity>
+
 <LivestockItem> ::= "Cows " | "Chickens " | "Sheep " | "Pigs "
 
-<Inventory> ::= "INVENTORY: " <ItemList> <Quantity>
+<Inventory> ::= "INVENTORY: " <ItemNode>
 
-<ItemList> ::= <Item> <Quantity> | <Item> <Quantity> ", " <ItemList>
+<ItemNode> ::= <ItemBranch> | <ItemLeaf>
+<ItemBranch> ::= <ItemNode> ", " <ItemNode>
+<ItemLeaf> ::= <Item> <Quantity>
+
 <Item> ::= <Seeds> | <Feed>
 
 <Location> ::= <Field> | <Barn>
