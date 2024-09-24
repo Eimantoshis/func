@@ -6,8 +6,9 @@
 
 <Crops> ::= "CROP: " <Crop> <Quantity> | "CROPS: "  <CropNode>
 
+
 <CropNode> ::= <CropBranch> | <CropLeaf>
-<CropBranch> ::= <CropNode> ", " <CropNode>
+<CropBranch> ::=  <pl> <CropNode> <pr> ", " <pl> <CropNode> <pr>
 <CropLeaf> ::= <Crop> <Quantity>
 
 <Crop> ::= "Wheat " | "Corn " | "Soy " | "Barley "
@@ -15,7 +16,7 @@
 <Livestock> ::= "LIVESTOCK: " <LivestockNode>
 
 <LivestockNode> ::= <LivestockBranch> | <LivestockLeaf>
-<LivestockBranch> ::= <LivestockNode> ", " <LivestockNode>
+<LivestockBranch> ::= <pl> <LivestockNode> <pr> ", " <pl> <LivestockNode> <pr>
 <LivestockLeaf> ::= <LivestockItem> <Quantity>
 
 <LivestockItem> ::= "Cows " | "Chickens " | "Sheep " | "Pigs "
@@ -23,7 +24,7 @@
 <Inventory> ::= "INVENTORY: " <ItemNode>
 
 <ItemNode> ::= <ItemBranch> | <ItemLeaf>
-<ItemBranch> ::= <ItemNode> ", " <ItemNode>
+<ItemBranch> ::= <pl> <ItemNode> <pr> ", " <pl> <ItemNode> <pr>
 <ItemLeaf> ::= <Item> <Quantity>
 
 <Item> ::= <Seeds> | <Feed>
@@ -41,3 +42,6 @@
 
 <FieldName> ::= "Field1 " | "Field2 " | "Field3 "
 <BarnName> ::= "Barn1 " | "Barn2 " | "Barn3 "
+
+<pl> ::= "("
+<pr> ::= ")"
