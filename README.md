@@ -28,7 +28,7 @@
 * Add/Remove Crops or Livestock: Add new crops or livestock to the system or remove them.
 
 **Code example**
-* FIELD: Field1 BARN: Barn1 INVENTORY: (Corn 0), ((Corn 92), (Hay 23))
-* RESTOCK INVENTORY: ((Wheat 4), ((((Hay 66), (Wheat 1)), (Corn 9)), ((Corn 04), (Corn 5)))), (Grains 3)
-* ADD CROPS: (Corn 2), ((Wheat 7), (Soy 580)) to BARN: Barn1 
-* REMOVE LIVESTOCK: ((Sheep 9), (((Cows 947), (Cows 7)), ((Pigs 6), (Pigs 2)))), (Sheep 257) FROM FIELD: Field3 
+* FIELD: Field2 BARN: Barn1 INVENTORY: (Wheat 993, ((Hay 7, Hay 30), Wheat 9))
+* REMOVE LIVESTOCK: (Cows 4, (Chickens 98, Chickens 0)) FROM BARN: Barn1 
+* RESTOCK INVENTORY: (Grains 5641, (Grains 3, (Wheat 17, Hay 0)))
+* ADD LIVESTOCK: ((Pigs 79, (Cows 5, Pigs 22)), Pigs 8) to BARN: Barn2 
