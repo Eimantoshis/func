@@ -1,0 +1,59 @@
+>>> ADD (Corn 6, (Wheat 9, (Soy 2, Barley 1123))) TO Field1
+Entity added to location!
+
+>>> SHOW CROPS
+Field1:
+  Corn 6
+  Wheat 9
+  Soy 2
+  Barley 1123
+
+>>> ADD (Wheat 1, Corn 4) TO Field1
+Entity added to location!
+
+>>> SHOW CROPS
+Field1:
+  Corn 10
+  Wheat 10
+  Soy 2
+  Barley 1123
+
+>>> ADD ((Cows 10, Chickens 20), (Sheep 5, Pigs 15)) TO Barn1
+Entity added to location!
+
+>>> SHOW LIVESTOCK
+Barn1:
+  Cows 10
+  Chickens 20
+  Sheep 5
+  Pigs 15
+
+>>> ADD Cows 1 TO Barn2
+Entity added to location!
+
+>>> SHOW LIVESTOCK
+Barn1:
+  Cows 10
+  Chickens 20
+  Sheep 5
+  Pigs 15
+Barn2:
+  Cows 1
+
+>>> REMOVE Cows 2 FROM Barn2
+ERROR:Insufficient quantity of livestock
+
+>>> SHOW FARM
+Field1:
+  Corn 10
+  Wheat 10
+  Soy 2
+  Barley 1123
+
+Barn1:
+  Cows 10
+  Chickens 20
+  Sheep 5
+  Pigs 15
+Barn2:
+  Cows 1
