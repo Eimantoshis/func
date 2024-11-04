@@ -42,3 +42,5 @@
 * Removed Inventory and its command Restock as it is worse version of add/remove.
 
 * Removed "CROP: ", "LIVESTOCK: ", "FIELD: ", "BARN: " for better visability since it is obvious and looks redundant
+
+* Added "PLANT" and "HARVEST" Operations 

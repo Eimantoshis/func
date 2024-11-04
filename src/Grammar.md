@@ -2,6 +2,8 @@
 
 <Operation> ::= "ADD " <Entity> " TO " <Location> 
               | "REMOVE " <Entity> " FROM " <Location> 
+              | "PLANT " <CropNode> " TO " <Location>
+              | "HARVEST " <CropNode> " FROM " <Location>
 
 <Entity> ::= <Crops> | <Livestock>
 

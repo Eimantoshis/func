@@ -36,8 +36,11 @@ unitTests = testGroup "Lib2 tests"
     testCase "Parsing case 6 - Parsing single remove Operation" $
       Lib2.parseQuery "REMOVE Chickens 10 FROM Barn1" @?= Right (Lib2.OperationQuery (Lib2.Remove (Lib2.Livestock (Lib2.LivestockLeaf Lib2.Chickens (Lib2.Quantity 10))) (Lib2.Barn "Barn1"))),
 
-    testCase "Parsing case 5 - Parsing add Operation branch" $
-      Lib2.parseQuery "ADD (Chickens 10, Sheep 5) TO Barn2" @?= Right(Lib2.OperationQuery(Lib2.Add(Lib2.Livestock(Lib2.LivestockBranch(Lib2.LivestockLeaf Lib2.Chickens (Lib2.Quantity 10))(Lib2.LivestockLeaf Lib2.Sheep (Lib2.Quantity 5))))(Lib2.Barn "Barn2")))
+    testCase "Parsing case 7 - Parsing add Operation branch" $
+      Lib2.parseQuery "ADD (Chickens 10, Sheep 5) TO Barn2" @?= Right(Lib2.OperationQuery(Lib2.Add(Lib2.Livestock(Lib2.LivestockBranch(Lib2.LivestockLeaf Lib2.Chickens (Lib2.Quantity 10))(Lib2.LivestockLeaf Lib2.Sheep (Lib2.Quantity 5))))(Lib2.Barn "Barn2"))),
+
+    testCase "Parsing case 8 - Parsing single plant Operation" $
+    Lib2.parseQuery "PLANT Corn 7 TO Field1" @?= Right (Lib2.OperationQuery (Lib2.Plant (Lib2.CropLeaf Lib2.Corn (Lib2.Quantity 7)) (Lib2.Field "Field1")))
 
 
     ]

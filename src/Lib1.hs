@@ -27,5 +27,7 @@ completions = [
 
     -- Commands
     "ADD",
-    "REMOVE"
+    "REMOVE",
+    "PLANT",
+    "HARVEST"
     ]

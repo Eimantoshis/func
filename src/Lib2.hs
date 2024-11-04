@@ -25,6 +25,7 @@ data Query = OperationQuery Operation
     | ShowCropsQuery
     | ShowLivestockQuery
     | ShowFarmQuery
+    | ShowPlantedQuery
 
 
 type Parser a = String -> Either String(a, String)
@@ -38,6 +39,8 @@ data Entity
 data Operation
     = Add Entity FarmLocation
     | Remove Entity FarmLocation
+    | Plant CropNode FarmLocation
+    | Harvest CropNode FarmLocation
     deriving (Eq)
 
 
@@ -58,6 +61,10 @@ data LivestockNode = LivestockLeaf Livestock Quantity | LivestockBranch Livestoc
 
 data Quantity = Quantity Int
     deriving (Eq)
+
+instance Num Quantity where
+    (Quantity x) * (Quantity y) = Quantity (x * y)
+    fromInteger x = Quantity (fromInteger x)
 
 instance Show Quantity where
     show (Quantity q) = show q 
@@ -81,6 +88,8 @@ instance Show LivestockNode where
 instance Show Operation where
     show (Add cropNode field) = "ADD: " ++ show cropNode ++ " TO " ++ show field
     show (Remove cropNode field) = "REMOVE " ++ show cropNode ++ " FROM " ++ show field
+    show (Plant cropNode field) = "PLANT " ++ show cropNode ++ " TO " ++ show field
+    show (Harvest cropNode field) = "HARVEST " ++ show cropNode ++ " FROM " ++ show field
 
 instance Show Entity where
     show (Crops cropNode) = "Crops: " ++ show cropNode
@@ -95,16 +104,6 @@ or2 p1 p2 input =
     case p1 input of
         Left _ -> p2 input  
         success -> success 
-
-and2' :: (a -> b -> c) -> Parser a -> Parser b -> Parser c
-and2' f a b = \input ->
-    case a input of
-        Right (v1, r1) ->
-            case b r1 of
-                Right (v2, r2) -> Right (f v1 v2, r2)
-                Left e2 -> Left e2
-        Left e1 -> Left e1
-
 
 
 parseWord :: String -> a -> Parser a
@@ -169,7 +168,7 @@ parseLivestockEntity input =
 --            | "REMOVE " <Entity> " FROM " <Location> 
 parseOperation :: Parser Operation
 parseOperation [] = Left "Cannot parse Operation: input is empty"
-parseOperation input = (parseAdd `or2` parseRemove) input
+parseOperation input = (parseAdd `or2` parseRemove `or2` parsePlant `or2` parseHarvest) input
 
 
 
@@ -189,6 +188,22 @@ parseAdd input =
                                 Right (location, remaining) ->
                                     Right (Add entity location, remaining)
 
+parseHarvest :: Parser Operation
+parseHarvest input =
+    case parseWord "HARVEST " () input of
+        Left _ -> Left "Invalid command"
+        Right (_, rest) ->
+            case parseCropNode rest of
+                Left _ -> Left "Invalid command"
+                Right (cropNode, rest1) ->
+                    case parseWord " FROM " () rest1 of
+                        Left _ -> Left "Invalid command"
+                        Right (_, rest2) ->
+                            case parseLocation rest2 of
+                                Left _ -> Left "Invalid command"
+                                Right (location, remaining) ->
+                                    Right (Harvest cropNode location, remaining)
+
 parseRemove :: Parser Operation
 parseRemove input =
     case parseWord "REMOVE " () input of
@@ -204,6 +219,22 @@ parseRemove input =
                                 Left _ -> Left "Invalid command"
                                 Right (location, remaining) ->
                                     Right (Remove entity location, remaining)
+
+parsePlant :: Parser Operation
+parsePlant input =
+    case parseWord "PLANT " () input of
+        Left _ -> Left "Invalid command"
+        Right (_, rest) ->
+            case parseCropNode rest of
+                Left _ -> Left "Invalid command"
+                Right (cropNode, rest1) ->
+                    case parseWord " TO " () rest1 of
+                        Left _ -> Left "Invalid command"
+                        Right (_, rest2) ->
+                            case parseLocation rest2 of
+                                Left _ -> Left "Invalid command"
+                                Right (location, remaining) ->
+                                    Right (Plant cropNode location, remaining)
 
 
 
@@ -367,13 +398,14 @@ instance Show Query where
 -- Define the initial State structure
 data State = State {
     fieldCrops      :: [(String, [(Crop, Quantity)])],  -- Field name with a list of crops and their quantities
-    barnLivestock   :: [(String, [(Livestock, Quantity)])] 
+    barnLivestock   :: [(String, [(Livestock, Quantity)])],
+    plantedCrops    :: [(String, [(Crop, Quantity)])] 
 } deriving (Show)
 
 
 -- Empty state as the initial state
 emptyState :: State
-emptyState = State [] []
+emptyState = State [] [] []
 
 -- State transition function
 stateTransition :: State -> Query -> Either String (Maybe String, State)
@@ -386,14 +418,42 @@ stateTransition state (OperationQuery (Remove entity location)) =
         Left err -> Left err 
         Right newState -> Right (Just "Entity removed from location!", newState)
 
+
+stateTransition state (OperationQuery (Plant cropNode location)) =
+    case location of
+        Field fieldName -> 
+            case removeCropFromField (fieldCrops state) fieldName cropNode of
+                Left err -> Left err
+                Right updatedFields ->
+                    let updatedPlanted = addOrUpdateCropsInField (plantedCrops state) fieldName cropNode
+                    in Right (Just "Crops planted!", state { fieldCrops = updatedFields, plantedCrops = updatedPlanted })
+        _ -> Left "Invalid location for planting."  -- Handle other location types if necessary
+
+
+stateTransition state (OperationQuery (Harvest cropNode location)) =
+    case location of
+        Field fieldName -> 
+            case removeCropFromField (plantedCrops state) fieldName cropNode of
+                Left err -> Left err
+                Right updatedPlanted ->
+                    case cropNode of
+                        CropLeaf crop quantity -> 
+                            -- Calculate the new quantity by multiplying the existing quantity by 4
+                            let newQuantity = quantity * 4  -- Ensure 'quantity' is of a compatible type
+                                harvestedCrop = CropLeaf crop newQuantity  -- Create a new CropLeaf with the multiplied quantity
+                                updatedFields = addOrUpdateCropsInField (fieldCrops state) fieldName harvestedCrop
+                            in Right (Just "Crops harvested!", state { fieldCrops = updatedFields, plantedCrops = updatedPlanted })
+                        CropBranch left right -> 
+                            Left "Harvesting from a CropBranch is not allowed."
+        _ -> Left "Invalid location for harvesting."
+
+
+
 stateTransition state ShowCropsQuery =
-    let summedFieldCrops = map (\(field, crops) -> (field, sumFieldCrops crops)) (fieldCrops state)
-        formattedCrops = unlines $ concatMap formatFieldCrops summedFieldCrops
-    in Right (Just formattedCrops, state)
-  where
-    formatFieldCrops :: (String, [(Crop, Quantity)]) -> [String]
-    formatFieldCrops (field, crops) =
-        [field ++ ":"] ++ map (\(crop, Quantity q) -> "  " ++ show crop ++ " " ++ show q) crops
+     Right (Just (showCrops state), state)
+
+stateTransition state ShowPlantedQuery =
+    Right (Just (showPlanted state), state)
 
 stateTransition state ShowLivestockQuery =
     let summedBarnLivestock = map (\(barn, mlivestock) -> (barn, sumBarnLivestock mlivestock)) (barnLivestock state)
@@ -405,14 +465,36 @@ stateTransition state ShowLivestockQuery =
         [barn ++ ":"] ++ map (\(livestock, Quantity q) -> "  " ++ show livestock ++ " " ++ show q) mlivestock
 
 stateTransition state ShowFarmQuery =
-    case (stateTransition state ShowCropsQuery, stateTransition state ShowLivestockQuery) of
-        (Right (Just crops, _), Right (Just livestock, _)) ->
-            Right (Just (crops ++ "\n" ++ livestock), state)
-        (Left err, _) -> Left err
-        (_, Left err) -> Left err
+    case (stateTransition state ShowCropsQuery, 
+          stateTransition state ShowPlantedQuery, 
+          stateTransition state ShowLivestockQuery) of
+        (Right (Just crops, _), Right (Just planted, _), Right (Just livestock, _)) ->
+            Right (Just ("Crops:\n" ++ crops ++ "\n\nPlanted:\n" ++ planted ++ "\n\nLivestock:\n" ++ livestock), state)
+        (Left err, _, _) -> Left err
+        (_, Left err, _) -> Left err
+        (_, _, Left err) -> Left err
+        
 
 showCrops :: State -> String
-showCrops state = "Crops: " ++ show (fieldCrops state)
+showCrops state = 
+    let summedFieldCrops = map (\(field, crops) -> (field, sumFieldCrops crops)) (fieldCrops state)
+        formattedCrops = unlines $ concatMap formatFieldCrops summedFieldCrops
+    in formattedCrops
+  where
+    formatFieldCrops :: (String, [(Crop, Quantity)]) -> [String]
+    formatFieldCrops (field, crops) =
+        [field ++ ":"] ++ map (\(crop, Quantity q) -> "  " ++ show crop ++ " " ++ show q) crops
+
+showPlanted :: State -> String
+showPlanted state =
+    let summedPlantedCrops = map (\(field, crops) -> (field, sumFieldCrops crops)) (plantedCrops state)
+        formattedPlanted = unlines $ concatMap formatFieldCrops summedPlantedCrops
+    in formattedPlanted
+  where
+    formatFieldCrops :: (String, [(Crop, Quantity)]) -> [String]
+    formatFieldCrops (field, crops) =
+        [field ++ ":"] ++ map (\(crop, Quantity q) -> "  " ++ show crop ++ " " ++ show q) crops
+
 
 showLivestock :: State -> String
 showLivestock state = "Livestock: " ++ show (barnLivestock state)
@@ -581,6 +663,7 @@ adjustQuantityLivestock ((l, Quantity q) : rest) livestock (Quantity qty)
 parseQuery :: String -> Either String Query
 parseQuery input
   | input == "" = Left "Cannot parse empty input"
+  | input == "SHOW PLANTED" = Right ShowPlantedQuery
   | input == "SHOW CROPS" = Right ShowCropsQuery
   | input == "SHOW LIVESTOCK" = Right ShowLivestockQuery
   | input == "SHOW FARM" = Right ShowFarmQuery
@@ -591,5 +674,5 @@ parseQuery input
 
 main :: IO()
 main = do
-    print(parseQuery "ADD Wheat 10 TO Field1")
-    print(parseQuery "ADD (Wheat 10, Corn 3) TO Field2")
+    print(parseQuery "PLANT Wheat 10 TO Field1")
+    -- Right Operation: PLANT Wheat 10 TO Field "Field1"

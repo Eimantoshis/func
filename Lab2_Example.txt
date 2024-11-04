@@ -18,6 +18,30 @@ Field1:
   Soy 2
   Barley 1123
 
+>>> PLANT Corn 10 TO Field1
+Crops planted!
+
+>>> SHOW PLANTED
+Field1:
+  Corn 10
+
+>>> SHOW CROPS
+Field1:
+  Corn 0
+  Wheat 10
+  Soy 2
+  Barley 1123
+
+>>> HARVEST Corn 10 FROM Field1
+Crops harvested!
+
+>>> SHOW CROPS
+Field1:
+  Corn 40
+  Wheat 10
+  Soy 2
+  Barley 1123
+
 >>> ADD ((Cows 10, Chickens 20), (Sheep 5, Pigs 15)) TO Barn1
 Entity added to location!
 
@@ -44,12 +68,20 @@ Barn2:
 ERROR:Insufficient quantity of livestock
 
 >>> SHOW FARM
+Crops:
 Field1:
-  Corn 10
+  Corn 40
   Wheat 10
   Soy 2
   Barley 1123
 
+
+Planted:
+Field1:
+  Corn 0
+
+
+Livestock:
 Barn1:
   Cows 10
   Chickens 20
