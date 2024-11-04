@@ -29,10 +29,13 @@
 
 * Add/Remove Crops or Livestock: Add new crops or livestock to the system or remove them.
 
+* Plant or Harvest Crops, where harvesting gives more back than planting.
+
 **Code example**
-* FIELD: Field2 BARN: Barn1 INVENTORY: (Wheat 993, ((Hay 7, Hay 30), Wheat 9))
 * REMOVE LIVESTOCK: (Cows 4, (Chickens 98, Chickens 0)) FROM BARN: Barn1 
 * ADD LIVESTOCK: ((Pigs 79, (Cows 5, Pigs 22)), Pigs 8) to BARN: Barn2 
+* PLANT Wheat 831 TO Barn1 
+* HARVEST ((Corn 1, Wheat 1), Barley 3) FROM Field2 
 
 
 
