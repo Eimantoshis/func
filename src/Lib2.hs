@@ -105,6 +105,21 @@ or2 p1 p2 input =
         Left _ -> p2 input  
         success -> success 
 
+and4' :: (a -> b -> c -> d -> e) -> Parser a -> Parser b -> Parser c -> Parser d -> Parser e
+and4' f a b c d = \input ->
+    case a input of
+        Right (v1, r1) ->
+            case b r1 of
+                Right (v2, r2) ->
+                    case c r2 of
+                        Right (v3, r3) ->
+                            case d r3 of
+                                Right (v4, r4) -> Right (f v1 v2 v3 v4, r4)
+                                Left _ -> Left "Invalid command"
+                        Left _ -> Left "Invalid command"
+                Left _ -> Left "Invalid command"
+        Left _ -> Left "Invalid command"
+
 
 parseWord :: String -> a -> Parser a
 parseWord word value = \input ->
@@ -171,70 +186,33 @@ parseOperation [] = Left "Cannot parse Operation: input is empty"
 parseOperation input = (parseAdd `or2` parseRemove `or2` parsePlant `or2` parseHarvest) input
 
 
-
 parseAdd :: Parser Operation
-parseAdd input =
-    case parseWord "ADD " () input of
-        Left _ -> Left "Invalid command"
-        Right (_, rest) ->
-            case parseEntity rest of
-                Left _ -> Left "Invalid command"
-                Right (entity, rest1) ->
-                    case parseWord " TO " () rest1 of
-                        Left _ -> Left "Invalid command"
-                        Right (_, rest2) ->
-                            case parseLocation rest2 of
-                                Left _ -> Left "Invalid command"
-                                Right (location, remaining) ->
-                                    Right (Add entity location, remaining)
+parseAdd = and4' (\_ entity _ location -> Add entity location)
+                 (parseWord "ADD " ())
+                 parseEntity
+                 (parseWord " TO " ())
+                 parseLocation
 
 parseHarvest :: Parser Operation
-parseHarvest input =
-    case parseWord "HARVEST " () input of
-        Left _ -> Left "Invalid command"
-        Right (_, rest) ->
-            case parseCropNode rest of
-                Left _ -> Left "Invalid command"
-                Right (cropNode, rest1) ->
-                    case parseWord " FROM " () rest1 of
-                        Left _ -> Left "Invalid command"
-                        Right (_, rest2) ->
-                            case parseLocation rest2 of
-                                Left _ -> Left "Invalid command"
-                                Right (location, remaining) ->
-                                    Right (Harvest cropNode location, remaining)
+parseHarvest = and4' (\_ cropNode _ location -> Harvest cropNode location)
+                     (parseWord "HARVEST " ())
+                     parseCropNode
+                     (parseWord " FROM " ())
+                     parseLocation
 
 parseRemove :: Parser Operation
-parseRemove input =
-    case parseWord "REMOVE " () input of
-        Left _ -> Left "Invalid command"
-        Right (_, rest) ->
-            case parseEntity rest of
-                Left _ -> Left "Invalid command"
-                Right (entity, rest1) ->
-                    case parseWord " FROM " () rest1 of
-                        Left _ -> Left "Invalid command"
-                        Right (_, rest2) ->
-                            case parseLocation rest2 of
-                                Left _ -> Left "Invalid command"
-                                Right (location, remaining) ->
-                                    Right (Remove entity location, remaining)
+parseRemove = and4' (\_ entity _ location -> Remove entity location)
+                    (parseWord "REMOVE " ())
+                    parseEntity
+                    (parseWord " FROM " ())
+                    parseLocation
 
 parsePlant :: Parser Operation
-parsePlant input =
-    case parseWord "PLANT " () input of
-        Left _ -> Left "Invalid command"
-        Right (_, rest) ->
-            case parseCropNode rest of
-                Left _ -> Left "Invalid command"
-                Right (cropNode, rest1) ->
-                    case parseWord " TO " () rest1 of
-                        Left _ -> Left "Invalid command"
-                        Right (_, rest2) ->
-                            case parseLocation rest2 of
-                                Left _ -> Left "Invalid command"
-                                Right (location, remaining) ->
-                                    Right (Plant cropNode location, remaining)
+parsePlant = and4' (\_ cropNode _ location -> Plant cropNode location)
+                   (parseWord "PLANT " ())
+                   parseCropNode
+                   (parseWord " TO " ())
+                   parseLocation
 
 
 
