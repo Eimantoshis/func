@@ -1,0 +1,6 @@
+BEGIN
+ADD Corn 6 TO Field1
+ADD Wheat 9 TO Field1
+ADD Soy 2 TO Field1
+ADD Barley 1123 TO Field1
+END

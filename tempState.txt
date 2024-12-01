@@ -1,0 +1,1 @@
+(Batch [Operation: PLANT Barley 97 TO Barn "Barn1",Operation: ADD: Crops: Soy 20 TO Field "Field1",Operation: PLANT Soy 96 TO Field "Field1",Operation: PLANT Wheat 87 TO Field "Field2",Operation: PLANT Corn 53 TO Barn "Barn3"],"")

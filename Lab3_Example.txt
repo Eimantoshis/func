@@ -1,0 +1,72 @@
+>>> :paste
+
+-- Entering multi-line mode. Press <Ctrl-D> to finish.
+| BEGIN
+| ADD (Corn 6, (Wheat 9, (Soy 2, Barley 1123))) TO Field1
+| ADD Wheat 10 TO Field1
+| ADD (Wheat 1, Corn 4) TO Field1
+| END
+| 
+-- Entering multi-line mode. Press <Ctrl-D> to finish.
+| BEGIN
+| ADD (Corn 6, (Wheat 9, (Soy 2, Barley 1123))) TO Field1
+| ADD Wheat 10 TO Field1
+| ADD (Wheat 1, Corn 4) TO Field1
+| END
+| 
+Success: 
+Entity added to location!
+Success: 
+Entity added to location!
+Success: 
+Entity added to location!
+Batch of queries proccessed succesfully
+
+>>> PLANT Corn 5 TO Field1
+Success: 
+Crops planted!
+
+>>> SHOW FARM
+Success: 
+Crops:
+Field1:
+  Corn 5
+  Wheat 20
+  Soy 2
+  Barley 1123
+
+
+Planted:
+Field1:
+  Corn 5
+
+
+Livestock:
+
+>>> Save
+Successfully saved content
+State saved
+
+
+
+>>> Load
+Successfully loaded content from file
+State loaded and batch applied successfully.
+
+>>> SHOW FARM
+Success: 
+Crops:
+Field1:
+  Corn 5
+  Wheat 20
+  Soy 2
+  Barley 1123
+
+
+Planted:
+Field1:
+  Corn 5
+
+
+Livestock:
+

@@ -14,6 +14,12 @@ module Lib2
     Livestock(..),
     FarmLocation(..),
     Quantity(..),
+    parseWord,
+    and2',
+    stateTransition,
+    parseAlphaNumWhitespaceOrdered,
+    State,
+
     ) where
 
 import qualified Data.Char as C
@@ -119,6 +125,16 @@ and4' f a b c d = \input ->
                         Left _ -> Left "Invalid command"
                 Left _ -> Left "Invalid command"
         Left _ -> Left "Invalid command"
+
+
+and2' :: (a -> b -> c) -> Parser a -> Parser b -> Parser c
+and2' f a b = \input ->
+    case a input of
+        Right (v1, r1) ->
+            case b r1 of
+                Right (v2, r2) -> Right (f v1 v2, r2)
+                Left e2 -> Left e2
+        Left e1 -> Left e1
 
 
 parseWord :: String -> a -> Parser a
@@ -380,6 +396,10 @@ data State = State {
     plantedCrops    :: [(String, [(Crop, Quantity)])] 
 } deriving (Show)
 
+instance Eq State where
+    State fc1 bl1 pc1 == State fc2 bl2 pc2 =
+        fc1 == fc2 && bl1 == bl2 && pc1 == pc2
+
 
 -- Empty state as the initial state
 emptyState :: State
@@ -593,18 +613,30 @@ removeEntityFromLocation state (Livestock livestockNode) (Barn barnName) =
 removeCropFromField :: [(String, [(Crop, Quantity)])] -> String -> CropNode -> Either String [(String, [(Crop, Quantity)])]
 removeCropFromField [] _ _ = Left "Field not found"
 removeCropFromField ((fname, crops) : rest) fieldName cropNode
-    | fname == fieldName = case removeCrops crops (flattenCrops cropNode) of
-        Left err -> Left err
-        Right updatedCrops -> Right ((fname, updatedCrops) : rest)
+    | fname == fieldName = 
+        case removeCrops crops (flattenCrops cropNode) of
+            Left err -> Left err
+            Right updatedCrops -> 
+                let filteredCrops = filter (\(_, Quantity q) -> q > 0) updatedCrops
+                in if null filteredCrops 
+                   then Right rest  -- If no crops remain, remove the field entirely
+                   else Right ((fname, filteredCrops) : rest)
     | otherwise = fmap ((fname, crops) :) (removeCropFromField rest fieldName cropNode)
 
+
 removeLivestockFromBarn :: [(String, [(Livestock, Quantity)])] -> String -> LivestockNode -> Either String [(String, [(Livestock, Quantity)])]
-removeLivestockFromBarn [] _ _ = Left "Field not found"
+removeLivestockFromBarn [] _ _ = Left "Barn not found"
 removeLivestockFromBarn ((bname, livestock) : rest) barnName livestockNode
-    | bname == barnName = case removeLivestock livestock (flattenLivestock livestockNode) of
-        Left err -> Left err
-        Right updatedLivestock -> Right ((bname, updatedLivestock) : rest)
+    | bname == barnName =
+        case removeLivestock livestock (flattenLivestock livestockNode) of
+            Left err -> Left err
+            Right updatedLivestock ->
+                let filteredLivestock = filter (\(_, Quantity q) -> q > 0) updatedLivestock
+                in if null filteredLivestock
+                   then Right rest  -- If no livestock remain, remove the barn entirely
+                   else Right ((bname, filteredLivestock) : rest)
     | otherwise = fmap ((bname, livestock) :) (removeLivestockFromBarn rest barnName livestockNode)
+
 
 -- function to remove a specific crop quantity
 removeCrops :: [(Crop, Quantity)] -> [(Crop, Quantity)] -> Either String [(Crop, Quantity)]
@@ -647,10 +679,24 @@ parseQuery input
   | input == "SHOW FARM" = Right ShowFarmQuery
   | otherwise = case parseOperation input of
       Right (operation, rest) -> Right (OperationQuery operation)
-      Left errorMsg            -> Left errorMsg
+      Left errorMsg           -> Left errorMsg
 
 
-main :: IO()
-main = do
-    print(parseQuery "PLANT Wheat 10 TO Field1")
-    -- Right Operation: PLANT Wheat 10 TO Field "Field1"
+parseWhitespace :: Parser Char
+parseWhitespace [] = Left "Cannot find any whitespace in an empty input"
+parseWhitespace s@(h:t) = if ' ' == h then Right (' ', t) else Left (s ++ " does not start with a whitespace")
+
+parseAlphaNum :: Parser String
+parseAlphaNum [] = Left "Cannot find any text made out of letters or digits in an empty input"
+parseAlphaNum str =
+    let
+        lettersDigits = L.takeWhile (\c -> C.isLetter c || C.isDigit c) str
+        rest = drop (length lettersDigits) str
+    in
+        case lettersDigits of
+            [] -> Left "Not a letter or a digit"
+            _ -> Right (lettersDigits, rest)
+
+parseAlphaNumWhitespaceOrdered :: Parser String
+parseAlphaNumWhitespaceOrdered = and2' (\a _ -> a) parseAlphaNum parseWhitespace
+
