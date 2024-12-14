@@ -1,6 +1,17 @@
 SHOW FARM
 Load
 Save
+SHOW FARM
+END
+ADD (Wheat 1, Corn 4) TO Field1
+ADD Wheat 10 TO Field1
+ADD (Corn 6, (Wheat 9, (Soy 2, Barley 1123))) TO Field1
+BEGIN
+:paste
+BEGIN SHOW FARM\n END
+SHOW FARM
+Load
+Save
 Sav e
 ADD (Corn 6, (Wheat 9, (Soy 2, Barley 1123))) TO Field1
 SHOW FARM

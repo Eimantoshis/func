@@ -1,4 +1,7 @@
-resolver: lts-21.25
+resolver: lts-20.21 
 system-ghc: true
 packages:
-- .
+  - .
+extra-deps:
+  - transformers-0.5.6.2
+  - mtl-2.2.2

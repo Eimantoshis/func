@@ -1,6 +1,12 @@
 BEGIN
-ADD Corn 6 TO Field1
-ADD Wheat 9 TO Field1
+ADD Corn 5 TO Field1
+ADD Wheat 10 TO Field1
 ADD Soy 2 TO Field1
 ADD Barley 1123 TO Field1
+ADD Sheep 11 TO Barn1
+ADD Pigs 15 TO Barn1
+ADD Cows 26 TO Barn1
+ADD Chickens 2 TO Barn1
+ADD Corn 5 TO Field1
+PLANT Corn 5 TO Field1
 END

@@ -15,6 +15,7 @@ module Lib3
 import Control.Concurrent ( Chan, readChan, writeChan, newChan )
 import Control.Concurrent.STM(STM, TVar, writeTVar, atomically)
 import qualified Lib2
+import Control.Monad (void)
 
 import Control.Exception (try, IOException)
 import Data.List (intercalate)
@@ -32,18 +33,18 @@ data StorageOp = Save String (Chan ()) | Load (Chan String)
 -- from chan, do the IO operations needed and respond
 -- to a channel provided in a request.
 -- Modify as needed.
-storageOpLoop :: Chan StorageOp -> IO ()
+storageOpLoop :: Chan Lib3.StorageOp -> IO ()
 storageOpLoop chan = do
-  op <- readChan chan 
+  op <- readChan chan
   case op of 
     Save content askChan -> do
       result <- try (writeFile "SaveState.txt" content) :: IO (Either IOException ())
       case result of
         Left ex -> do
-          putStrLn $ "Error saving to file: " ++ show ex 
+          putStrLn $ "Error saving to file: " ++ show ex
         Right _ -> do
           putStrLn "Successfully saved content"
-      writeChan askChan()
+      writeChan askChan ()
       storageOpLoop chan
     
     Load replyChan -> do
@@ -56,6 +57,8 @@ storageOpLoop chan = do
           putStrLn "Successfully loaded content from file"
           writeChan replyChan content
       storageOpLoop chan
+
+
 
 
 data Statements = Batch [Lib2.Query] |
@@ -261,26 +264,24 @@ renderOperation op =
 -- State update must be executed atomically (STM).
 -- Right contains an optional message to print, updated state
 -- is stored in transactinal variable
-stateTransition :: TVar Lib2.State -> Command -> Chan StorageOp ->
+stateTransition :: TVar Lib2.State -> Command -> Chan StorageOp -> 
                    IO (Either String (Maybe String))
 stateTransition stateVar command ioChan = do
   case command of
     StatementCommand (Batch queries) -> do
       results <- atomically $ mapM (processSingleQuery stateVar) queries
-
-      mapM_ printQueryResponse results
-
+      let resultMessages = map (either id (maybe "" id)) results
+      let combinedMessage = unlines resultMessages
       if any isLeft results
         then return $ Left "One or more queries in the batch failed."
-        else return $ Right $ Just "Batch of queries proccessed succesfully"
+        else return $ Right $ Just $ "Batch of queries processed successfully.\n" ++ combinedMessage
 
     StatementCommand (Single query) -> do
       result <- atomically $ processSingleQuery stateVar query
-      printQueryResponse result
-
-      if isLeft result
-        then return $ Left "Query failed."
-        else return $ Right Nothing
+      case result of
+        Left err -> return $ Left err
+        Right Nothing -> return $ Right Nothing
+        Right (Just msg) -> return $ Right $ Just ("Success: \n" ++ msg)
 
     LoadCommand -> do
       responseChan <- newChan
@@ -292,31 +293,29 @@ stateTransition stateVar command ioChan = do
             -- Reset the state to an empty state before applying queries
             writeTVar stateVar Lib2.emptyState
             results <- mapM (processSingleQuery stateVar) queries
+            let resultMessages = map (either id (maybe "" id)) results
+            let combinedMessage = unlines resultMessages
             if any isLeft results
               then return $ Left "One or more queries in the loaded batch failed."
-              else return $ Right $ Just "State loaded and batch applied successfully."
+              else return $ Right $ Just ("State loaded and batch applied successfully.\n" ++ combinedMessage)
           Single query -> atomically $ do
             -- Reset the state to an empty state before applying the query
             writeTVar stateVar Lib2.emptyState
             result <- processSingleQuery stateVar query
-            if isLeft result
-              then return $ Left "Query in the loaded file failed."
-              else return $ Right $ Just "State loaded with a single query."
+            case result of
+              Left err -> return $ Left err
+              Right Nothing -> return $ Right Nothing
+              Right (Just msg) -> return $ Right $ Just ("State loaded with a single query.\n" ++ msg)
         Left err -> return $ Left $ "Failed to parse loaded state: " ++ err
 
-
-
-    
     SaveCommand -> do
       currentState <- readTVarIO stateVar
       let statementsAsString = renderStatements $ marshallState currentState
-
       responseChan <- newChan
-
       writeChan ioChan (Save statementsAsString responseChan)
-
       _ <- readChan responseChan
       return $ Right $ Just "State saved"
+
 
 
 processSingleQuery :: TVar Lib2.State -> Lib2.Query -> STM (Either String(Maybe String))
@@ -332,8 +331,9 @@ processSingleQuery givenState query = do
 
 printQueryResponse :: Either String (Maybe String) -> IO ()
 printQueryResponse (Left err) = putStrLn $ "Failed: \n" ++ err
-printQueryResponse (Right Nothing) = putStrLn "Sucess: No message returned"
+printQueryResponse (Right Nothing) = putStrLn "Success: No message returned"
 printQueryResponse (Right (Just msg)) = putStrLn $ "Success: \n" ++ msg
+
 
 applyStatements :: [Lib2.Query] -> Lib2.State -> Lib2.State
 applyStatements queries initialState =
@@ -344,9 +344,4 @@ applyStatements queries initialState =
         case Lib2.stateTransition state query of
             Right (_, newState) -> newState
             Left _ -> state  
-
-
-
-
-
 
