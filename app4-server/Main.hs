@@ -15,36 +15,32 @@ import GHC.Conc (TVar, newTVarIO, readTVarIO, atomically, writeTVar)
 import Data.String.Conversions (cs)
 import System.IO.Silently (capture)
 
--- Function for parsing commands with state
 parseCommandWithState :: String -> ExceptT String (StateT String IO) (String, Lib3.Command)
 parseCommandWithState input = do
-    lift $ State.put input  -- Put input into the State
-    -- Use liftIO to run IO action and handle the result
+    lift $ State.put input 
     (output, resultIO) <- liftIO $ System.IO.Silently.capture $ do
         case Lib3.parseCommand input of
             Right (cmd, "") -> return (Right cmd)
             Right _ -> return (Left "Parse Error: not whole string has been consumed")
             Left err -> return (Left ("Parse Error: " ++ err))
-    -- Handle the IO result by unwrapping the Either
     case resultIO of
         Right cmd -> return (output, cmd)
         Left err -> throwE $ output ++ err
 
--- Main server function
 main :: IO ()
 main = do
     state <- newTVarIO Lib2.emptyState
     chan <- newChan :: IO (Chan Lib3.StorageOp)
-    _ <- forkIO $ Lib3.storageOpLoop chan  -- Start storage operation loop
+    _ <- forkIO $ Lib3.storageOpLoop chan  
     scotty 3000 $ do
         post "/upload" $ do
             b <- body
             let input = cs b
             let parser = parseCommandWithState input
-            result <- liftIO $ runStateT (runExceptT parser) ""  -- Handle IO action here
+            result <- liftIO $ runStateT (runExceptT parser) ""  
             case result of
                 (Right (logs, cmd), _) -> do
-                    liftIO $ putStrLn logs  -- Print parsing logs
+                    liftIO $ putStrLn logs 
                     case cmd of
                         Lib3.SaveCommand -> do
                             result <- liftIO $ Lib3.stateTransition state Lib3.SaveCommand chan
